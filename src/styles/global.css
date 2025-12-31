@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos personalizados para el recetario */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Transiciones de página */
+@view-transition {
+  navigation: auto;
+}
+
+/* Animaciones personalizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Clases utilitarias personalizadas */
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+/* Mejoras para el video sticky */
+.sticky {
+  position: sticky;
+  top: 2rem;
+}
+
+/* Estilos para el contenedor de recetas */
+.recipe-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recipe-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Mejoras para la tipografía */
+.text-gradient {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Estilos para los pasos de recetas */
+.step-number {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.3);
+}
+
+/* Responsive design mejorado */
+@media (max-width: 768px) {
+  .sticky {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Estilos para el buscador */
+.search-input:focus {
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Transiciones suaves para elementos interactivos */
+button, a, input {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Mejoras de accesibilidad */
+.focus-visible:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+/* Estilos para las etiquetas de dificultad */
+.difficulty-easy {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.difficulty-medium {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.difficulty-hard {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Asegurar que el badge siempre sea visible */
+.difficulty-badge {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 20;
+}
+
+.difficulty-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: inherit;
+  z-index: -1;
+}

@@ -1,0 +1,369 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { recipes } from "../data/recipes";
+
+const baseUrl = import.meta.env.BASE_URL;
+
+// Obtener parámetros de la URL
+const url = Astro.url;
+const searchParam = url.searchParams.get("search") || "";
+const filterParam = url.searchParams.get("filter") || "all";
+
+// Generar filtros dinámicos (mismo código que en index)
+const allTags = new Set<string>();
+const allDifficulties = new Set<string>();
+
+recipes.forEach((recipe) => {
+  recipe.tags.forEach((tag) => allTags.add(tag));
+  allDifficulties.add(recipe.difficulty);
+});
+
+const sortedTags = Array.from(allTags).sort();
+const sortedDifficulties = Array.from(allDifficulties).sort();
+---
+
+<Layout title="Todas las Recetas - Recetario">
+  <div class="mb-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+      Todas las Recetas
+    </h1>
+    <p class="text-gray-600">
+      Explora nuestra colección completa de {recipes.length} recetas
+      {searchParam && ` - Buscando: "${searchParam}"`}
+      {filterParam !== "all" && ` - Filtro: ${filterParam}`}
+    </p>
+  </div>
+
+  <!-- Buscador y filtros -->
+  <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <!-- Buscador -->
+    <div class="mb-6">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Buscar recetas..."
+        value={searchParam}
+        class="w-full px-4 py-3 border-2 border-orange-200 rounded-lg focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-200 search-input"
+      />
+    </div>
+
+    <!-- Filtros dinámicos -->
+    <div class="flex flex-wrap gap-3">
+      <button
+        class={`filter-btn ${filterParam === "all" ? "active" : ""}`}
+        data-filter="all"
+      >
+        Todas
+      </button>
+
+      <!-- Filtros por dificultad -->
+      {
+        sortedDifficulties.map((difficulty) => (
+          <button
+            class={`filter-btn ${filterParam === difficulty ? "active" : ""}`}
+            data-filter={difficulty}
+          >
+            {difficulty === "Fácil"
+              ? "Fáciles"
+              : difficulty === "Intermedio"
+                ? "Intermedias"
+                : difficulty === "Avanzado"
+                  ? "Avanzadas"
+                  : difficulty}
+          </button>
+        ))
+      }
+
+      <!-- Filtros por tags -->
+      {
+        sortedTags.map((tag) => (
+          <button
+            class={`filter-btn ${filterParam === tag ? "active" : ""}`}
+            data-filter={tag}
+          >
+            {tag === "española"
+              ? "Españolas"
+              : tag === "arroz"
+                ? "Con Arroz"
+                : tag === "patatas"
+                  ? "Patatas"
+                  : tag === "vegetariano"
+                    ? "Vegetarianas"
+                    : tag === "marinero"
+                      ? "Marineras"
+                      : tag === "postre"
+                        ? "Postres"
+                        : tag.charAt(0).toUpperCase() + tag.slice(1)}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Grid de recetas -->
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    id="recipesContainer"
+  >
+    {
+      recipes.map((recipe) => (
+        <article
+          class="recipe-card bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+          data-title={recipe.title.toLowerCase()}
+          data-description={recipe.description.toLowerCase()}
+          data-difficulty={recipe.difficulty}
+          data-tags={recipe.tags.join(" ")}
+        >
+          <div class="relative">
+            <img
+              src={recipe.image}
+              alt={recipe.title}
+              class="w-full h-48 object-cover recipe-image"
+              loading="lazy"
+              onerror={"this.src='" + baseUrl + "fallback-image.svg'"}
+            />
+            <div class="absolute top-4 right-4">
+              <span
+                class={`px-3 py-1 rounded-full text-sm font-medium ${
+                  recipe.difficulty === "Fácil"
+                    ? "difficulty-easy text-white"
+                    : recipe.difficulty === "Intermedio"
+                      ? "difficulty-medium text-white"
+                      : "difficulty-hard text-white"
+                }`}
+              >
+                {recipe.difficulty}
+              </span>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-2">{recipe.title}</h3>
+            <p class="text-gray-600 mb-4 line-clamp-2">{recipe.description}</p>
+
+            <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <div class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span>{recipe.prepTime} min</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{recipe.servings} personas</span>
+              </div>
+            </div>
+
+            <a
+              href={`${baseUrl}receta/${recipe.id}`}
+              class="block w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg text-center transition-colors"
+            >
+              Ver Receta Completa
+            </a>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+
+  <!-- Mensaje cuando no hay resultados -->
+  <div id="noResults" class="hidden text-center py-12">
+    <div class="text-gray-400 mb-4">
+      <svg
+        class="w-16 h-16 mx-auto"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-600 mb-2">
+      No se encontraron recetas
+    </h3>
+    <p class="text-gray-500">
+      Intenta con otros términos de búsqueda o filtros diferentes
+    </p>
+  </div>
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .recipe-card.hidden {
+    display: none;
+  }
+
+  .filter-btn {
+    @apply px-4 py-2 rounded-full border-2 border-orange-200 text-orange-600 hover:bg-orange-100 transition-colors text-sm;
+  }
+
+  .filter-btn.active {
+    @apply bg-orange-500 text-white border-orange-500;
+  }
+
+  .recipe-image-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .recipe-image {
+    transition: opacity 0.3s ease-in-out;
+    position: relative;
+    z-index: 1;
+  }
+
+  .recipe-fallback {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+  }
+
+  .recipe-fallback.show {
+    display: flex !important;
+  }
+</style>
+
+<script>
+  // Función para inicializar la página
+  function initializeRecipesPage() {
+    const searchInput = document.getElementById(
+      "searchInput"
+    ) as HTMLInputElement;
+    const recipeCards = document.querySelectorAll(
+      ".recipe-card"
+    ) as NodeListOf<HTMLElement>;
+    const noResults = document.getElementById("noResults") as HTMLElement;
+    const filterBtns = document.querySelectorAll(".filter-btn");
+
+    // Obtener parámetros de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    let currentFilter = urlParams.get("filter") || "all";
+    let currentSearch = urlParams.get("search") || "";
+
+    // Establecer el valor inicial del input de búsqueda
+    if (searchInput) {
+      searchInput.value = currentSearch;
+    }
+
+    // Función de filtrado completa
+    function filterRecipes() {
+      // Usar currentSearch en lugar del valor del input para el filtrado inicial
+      const searchTerm = currentSearch.toLowerCase().trim();
+      let visibleCount = 0;
+
+      recipeCards.forEach((card) => {
+        const title = card.getAttribute("data-title") || "";
+        const description = card.getAttribute("data-description") || "";
+        const difficulty = card.getAttribute("data-difficulty") || "";
+        const tags = card.getAttribute("data-tags") || "";
+
+        // Verificar búsqueda
+        const matchesSearch =
+          searchTerm === "" ||
+          title.includes(searchTerm) ||
+          description.includes(searchTerm) ||
+          tags.includes(searchTerm);
+
+        // Verificar filtro
+        const matchesFilter =
+          currentFilter === "all" ||
+          difficulty === currentFilter ||
+          tags.includes(currentFilter);
+
+        const isVisible = matchesSearch && matchesFilter;
+
+        if (isVisible) {
+          card.classList.remove("hidden");
+          visibleCount++;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+
+      // Mostrar/ocultar mensaje de no resultados
+      if (noResults) {
+        if (visibleCount === 0) {
+          noResults.classList.remove("hidden");
+        } else {
+          noResults.classList.add("hidden");
+        }
+      }
+    }
+
+    // Event listener para el buscador
+    if (searchInput) {
+      let searchTimeout: number;
+      searchInput.addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = window.setTimeout(() => {
+          const newSearch = searchInput.value.trim();
+          currentSearch = newSearch;
+          updateURL(newSearch, currentFilter);
+          filterRecipes();
+        }, 300);
+      });
+    }
+
+    // Event listeners para filtros
+    filterBtns.forEach((btn: any) => {
+      btn.addEventListener("click", (e: Event) => {
+        e.preventDefault();
+
+        // Actualizar botones activos
+        filterBtns.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        currentFilter = btn.dataset.filter || "all";
+        updateURL(currentSearch, currentFilter);
+        filterRecipes();
+      });
+    });
+
+    // Función para actualizar URL
+    function updateURL(search: string, filter: string) {
+      const params = new URLSearchParams();
+
+      if (search) {
+        params.set("search", search);
+      }
+
+      if (filter !== "all") {
+        params.set("filter", filter);
+      }
+
+      const newURL = params.toString()
+        ? `${window.location.pathname}?${params.toString()}`
+        : window.location.pathname;
+
+      window.history.replaceState({}, "", newURL);
+    }
+
+    // Aplicar filtros iniciales al cargar la página
+    filterRecipes();
+  }
+
+  // Ejecutar al cargar la página (DOM ready)
+  document.addEventListener("DOMContentLoaded", initializeRecipesPage);
+
+  // Ejecutar también después de las View Transitions de Astro
+  document.addEventListener("astro:page-load", initializeRecipesPage);
+</script>

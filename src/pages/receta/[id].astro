@@ -1,0 +1,288 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { recipes } from "../../data/recipes";
+import type { Recipe } from "../../types/recipe";
+
+export async function getStaticPaths() {
+  return recipes.map((recipe) => ({
+    params: { id: recipe.id },
+    props: { recipe },
+  }));
+}
+
+const baseUrl = import.meta.env.BASE_URL
+
+const { recipe } = Astro.props as { recipe: Recipe };
+---
+
+<Layout title={`${recipe.title} - Recetario`} description={recipe.description}>
+  <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+    <!-- Contenido principal -->
+    <div class="lg:col-span-2">
+      <!-- Header de la receta -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="relative">
+          <img
+            src={recipe.image}
+            alt={recipe.title}
+            class="w-full h-64 md:h-80 object-cover recipe-main-image"
+            onerror={"this.src='" + baseUrl + "fallback-image.svg'"}
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"
+          >
+          </div>
+          <div class="absolute bottom-6 left-6 text-white">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 animate-fade-in-up">
+              {recipe.title}
+            </h1>
+            <p class="text-lg opacity-90 animate-slide-in-left">
+              {recipe.description}
+            </p>
+          </div>
+        </div>
+
+        <div class="p-6">
+          <div class="flex flex-wrap items-center gap-6 text-sm">
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-orange-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                  clip-rule="evenodd"></path>
+              </svg>
+              <span class="font-medium">{recipe.prepTime} minutos</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-orange-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="font-medium">{recipe.servings} personas</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg
+                class="w-5 h-5 text-orange-500"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                ></path>
+              </svg>
+              <span
+                class={`font-medium ${
+                  recipe.difficulty === "Fácil"
+                    ? "text-green-600"
+                    : recipe.difficulty === "Intermedio"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                }`}>{recipe.difficulty}</span
+              >
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2 mt-4">
+            {
+              recipe.tags.map((tag) => (
+                <span class="px-3 py-1 bg-orange-100 text-orange-700 text-sm rounded-full">
+                  #{tag}
+                </span>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Ingredientes -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <h2
+          class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"
+        >
+          <svg
+            class="w-6 h-6 text-orange-500"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"
+            ></path>
+          </svg>
+          Ingredientes
+        </h2>
+        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {
+            recipe.ingredients.map((ingredient) => (
+              <li class="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                <div class="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0" />
+                <span class="font-medium">
+                  {ingredient.amount} {ingredient.unit}
+                </span>
+                <span class="text-gray-600">{ingredient.name}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <!-- Pasos de preparación -->
+      <div class="bg-white rounded-xl shadow-lg p-6">
+        <h2
+          class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2"
+        >
+          <svg
+            class="w-6 h-6 text-orange-500"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
+              clip-rule="evenodd"></path>
+          </svg>
+          Preparación
+        </h2>
+        <div class="space-y-6">
+          {
+            recipe.steps.map((step) => (
+              <div class="flex gap-4 p-4 border border-orange-100 rounded-lg hover:bg-orange-50 transition-colors">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 step-number text-white rounded-full flex items-center justify-center font-bold text-lg">
+                    {step.number}
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                    {step.title}
+                  </h3>
+                  <p class="text-gray-600 mb-3">{step.description}</p>
+                  {step.duration && (
+                    <div class="flex items-center gap-1 text-sm text-orange-600 mb-3">
+                      <svg
+                        class="w-4 h-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <span>{step.duration} minutos</span>
+                    </div>
+                  )}
+                  {step.image && (
+                    <img
+                      src={step.image}
+                      alt={`Paso ${step.number}: ${step.title}`}
+                      class="w-full max-w-md rounded-lg shadow-md recipe-step-image"
+                      loading="lazy"
+                      onerror="this.src='/fallback-image.svg'"
+                    />
+                  )}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Video sticky lateral -->
+    <div class="lg:col-span-1 mt-8 lg:mt-0">
+      <div class="sticky top-8">
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="p-4 bg-orange-500 text-white">
+            <h3 class="text-lg font-semibold flex items-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"
+                ></path>
+              </svg>
+              Video explicativo
+            </h3>
+          </div>
+          <div class="aspect-video">
+            <iframe
+              src={recipe.video}
+              title={`Video: ${recipe.title}`}
+              class="w-full h-full"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+          </div>
+          <div class="p-4">
+            <p class="text-sm text-gray-600">
+              Sigue este video paso a paso para conseguir el mejor resultado en
+              tu {recipe.title.toLowerCase()}.
+            </p>
+          </div>
+        </div>
+
+        <!-- Botón de vuelta -->
+        <div class="mt-6">
+          <a
+            href={baseUrl+"recetas"}
+            class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-4 rounded-lg text-center transition-colors flex items-center justify-center gap-2"
+          >
+            <svg
+              class="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Ver todas las recetas
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .recipe-image-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .recipe-main-image,
+  .recipe-step-image {
+    transition: opacity 0.3s ease-in-out;
+    position: relative;
+    z-index: 1;
+  }
+
+  .recipe-fallback {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0;
+  }
+
+  .recipe-fallback.show {
+    display: flex !important;
+  }
+</style>
+
+<script>
+  // JavaScript simplificado sin sistema complejo de fallback
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log("Página de receta cargada correctamente");
+  });
+</script>
